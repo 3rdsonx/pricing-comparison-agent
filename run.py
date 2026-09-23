@@ -16,6 +16,7 @@ import os
 import sys
 
 from agent import compare
+from dashboard import open_dashboard, write_dashboard
 from schema import PricingComparisonResult
 
 
@@ -110,6 +111,7 @@ def main() -> int:
     parser.add_argument("--model", default=None, help="Override LLM_MODEL, e.g. openai:gpt-4o or anthropic:claude-sonnet-5")
     parser.add_argument("--out-dir", default="output")
     parser.add_argument("--diff-against", default=None, help="Path to a previous snapshot JSON to diff against")
+    parser.add_argument("--no-dashboard", action="store_true", help="Skip writing/opening the HTML dashboard")
     args = parser.parse_args()
 
     buyer_profile = {
@@ -130,6 +132,11 @@ def main() -> int:
     _print_result(result)
     _write_artifacts(result, args.out_dir)
     print(f"\nWrote {args.out_dir}/comparison_table.md, cost_ranking.md, quote_required.md")
+
+    if not args.no_dashboard:
+        dashboard_path = write_dashboard(result, args.out_dir)
+        print(f"Wrote {dashboard_path}")
+        open_dashboard(dashboard_path)
 
     diff_against = args.diff_against
     if diff_against is None:

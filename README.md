@@ -41,6 +41,10 @@ Writes three artifacts to `./output` (or `--out-dir`): `comparison_table.md`,
 the same output directory) to see what changed since a prior run, this is the "run it on
 a schedule" path, not required for a single demo run.
 
+Also writes `dashboard.html` to the same directory and opens it in the default
+browser (skip with `--no-dashboard`): a ranked cost bar per vendor with the tier and
+assumptions on hover, the quote-required list, and the full extracted pricing table.
+
 Buyer profile flags: `--hosts`, `--gb-ingested`, `--seats`, `--events`, mapping to the
 `billing_unit` values a vendor's tiers can be extracted against. Supply at least one.
 
@@ -58,6 +62,8 @@ provider package (`langchain-openai` is bundled).
   results are sliced to the query-relevant windows of the page, not head-truncated.
 - `agent_api_v2.py` - the Pattern B driver (`nimble.agents.run` -> poll -> result).
 - `run.py` - Pattern A CLI and the shared artifact writer.
+- `dashboard.py` - writes the self-contained `dashboard.html` artifact both entrypoints
+  open after a run.
 
 ## Example
 

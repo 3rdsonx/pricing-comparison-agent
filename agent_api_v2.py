@@ -20,6 +20,7 @@ from dotenv import load_dotenv
 from nimble_python import Nimble
 
 from config import SKILL
+from dashboard import open_dashboard, write_dashboard
 from pricing_model import build_cost_ranking
 from run import _print_result, _write_artifacts
 from schema import PriceTier, PricingComparisonResult, VendorPricing
@@ -154,6 +155,7 @@ def main() -> int:
     parser.add_argument("--poll-interval", type=int, default=15)
     parser.add_argument("--out-dir", default="output")
     parser.add_argument("--json", metavar="PATH", default=None)
+    parser.add_argument("--no-dashboard", action="store_true", help="Skip writing/opening the HTML dashboard")
     args = parser.parse_args()
 
     buyer_profile = {
@@ -169,6 +171,10 @@ def main() -> int:
     result = to_comparison_result(raw, buyer_profile, dt.date.today().isoformat())
     _print_result(result)
     _write_artifacts(result, args.out_dir)
+    if not args.no_dashboard:
+        dashboard_path = write_dashboard(result, args.out_dir)
+        print(f"Wrote {dashboard_path}")
+        open_dashboard(dashboard_path)
     if args.json:
         with open(args.json, "w") as fh:
             json.dump(raw, fh, indent=2, default=str)
