@@ -68,6 +68,10 @@ def _table_rows(result: PricingComparisonResult) -> str:
     rows = []
     for v in result.vendors:
         for t in v.tiers:
+            # overage_rate_per_unit (base_plus_overage) and flat_rate_per_unit
+            # (pure_per_unit) are both "the $/unit rate" from the reader's point of
+            # view, just for different tier shapes, so they share this column.
+            rate = t.overage_rate_per_unit if t.overage_rate_per_unit is not None else t.flat_rate_per_unit
             rows.append(
                 "<tr>"
                 f"<td>{html.escape(v.vendor)}</td>"
@@ -76,7 +80,7 @@ def _table_rows(result: PricingComparisonResult) -> str:
                 f"<td>{html.escape(_UNIT_LABEL.get(t.billing_unit, t.billing_unit))}</td>"
                 f"<td class=\"num\">{_fmt_money(t.base_fee_monthly) if t.base_fee_monthly is not None else '&ndash;'}</td>"
                 f"<td class=\"num\">{f'{t.included_quantity:,.0f}' if t.included_quantity is not None else '&ndash;'}</td>"
-                f"<td class=\"num\">{_fmt_money(t.overage_rate_per_unit) if t.overage_rate_per_unit is not None else '&ndash;'}</td>"
+                f"<td class=\"num\">{_fmt_money(rate) if rate is not None else '&ndash;'}</td>"
                 f"<td><a href=\"{html.escape(t.source_url)}\">source</a></td>"
                 "</tr>"
             )
@@ -274,7 +278,7 @@ _TEMPLATE = """<!doctype html>
       <p class="caption">Every tier the agent found, computable or not, with its source.</p>
       <table>
         <thead>
-          <tr><th>Vendor</th><th>Tier</th><th>Type</th><th>Billing unit</th><th>Base fee/mo</th><th>Included</th><th>Overage rate</th><th>Source</th></tr>
+          <tr><th>Vendor</th><th>Tier</th><th>Type</th><th>Billing unit</th><th>Base fee/mo</th><th>Included</th><th>Rate/unit</th><th>Source</th></tr>
         </thead>
         <tbody>
           {table_rows}
